@@ -4,6 +4,7 @@ import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.example.searchbookmarkex.model.vo.KeywordSearch;
 import org.example.searchbookmarkex.model.vo.NaverSearchParam;
+import org.example.searchbookmarkex.model.vo.NaverSearchResult;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -34,6 +35,15 @@ public class NaverSearchAPI implements DotenvMixin , ObjectMapperMixin {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         String responseBody = response.body();
         logger.info(responseBody);
-        return List.of();
+        NaverSearchResult naverSearchResult = objectMapper.readValue(responseBody, NaverSearchResult.class);
+        return naverSearchResult.items()
+                .stream().map(item -> new KeywordSearch(
+                "", //uuid -> DB에서 생성
+                item.title(),
+                item.link(),
+                item.description(),
+                item.postdate(),
+                "" // createdAt -> DB에서 생성
+        )).toList();
     }
 }
